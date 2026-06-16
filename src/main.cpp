@@ -151,7 +151,7 @@ void setup() {
     if (!security.validateRequest(request)) { request->send(403); return; }
     if (request->hasParam("path")) {
       String path = request->getParam("path")->value();
-      AsyncWebServerResponse *response = request->beginResponse(LittleFS, path);
+      AsyncWebServerResponse *response = request->beginResponse(LittleFS, path, "application/octet-stream");
       request->send(response);
     } else {
       request->send(400);
@@ -176,10 +176,14 @@ void setup() {
     }
   });
 
-  server.on("/api/ota", HTTP_POST, [](AsyncWebServerRequest *request){
+  server.on("/api/ota/firmware", HTTP_POST, [](AsyncWebServerRequest *request){
     if (!security.validateRequest(request)) { request->send(403); return; }
-    ota.beginOTA(request);
-    request->send(200, "application/json", "{\"status\":\"OTA started\"}");
+    ota.beginFirmwareOTA(request);
+  });
+
+  server.on("/api/ota/littlefs", HTTP_POST, [](AsyncWebServerRequest *request){
+    if (!security.validateRequest(request)) { request->send(403); return; }
+    ota.beginLittleFSOTA(request);
   });
 
   xTaskCreatePinnedToCore([](void* p){ for(;;){ scheduler.tick(); vTaskDelay(1000/portTICK_PERIOD_MS); } }, "sched", 4096, NULL, 1, &taskSchedulerHandle, 0);

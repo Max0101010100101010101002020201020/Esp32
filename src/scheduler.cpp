@@ -1,4 +1,5 @@
 #include "scheduler.h"
+#include <Arduino.h>
 
 void Scheduler::tick() {
   unsigned long now = millis();
