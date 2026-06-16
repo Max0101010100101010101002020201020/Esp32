@@ -4,7 +4,8 @@ set -e
 ESP_IP="$1"
 USERNAME="$2"
 PASSWORD="$3"
-REPO="TU_USUARIO/esp32_iot_platform"   # <-- CÁMBIALO por tu repositorio
+REPO="Max0101010100101010101002020201020/Esp32"
+TOKEN_FILE="$HOME/.esp32_token"
 
 if [ -z "$ESP_IP" ] || [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
   echo "Uso: $0 <IP_ESP32> <usuario> <contraseña>"
@@ -16,13 +17,32 @@ if [ -z "$GITHUB_TOKEN" ]; then
   exit 1
 fi
 
-echo "[1/6] Obteniendo token JWT..."
-TOKEN=$(curl -s -X POST "http://${ESP_IP}/api/login" \
-  -d "username=${USERNAME}&password=${PASSWORD}" | jq -r '.token')
-if [ "$TOKEN" == "null" ]; then
+get_token() {
+  if [ -f "$TOKEN_FILE" ]; then
+    CACHED_TOKEN=$(cat "$TOKEN_FILE")
+    STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${CACHED_TOKEN}" "http://${ESP_IP}/api/status")
+    if [ "$STATUS" -eq 200 ]; then
+      echo "$CACHED_TOKEN"
+      return
+    fi
+  fi
+  NEW_TOKEN=$(curl -s -X POST "http://${ESP_IP}/api/login" \
+    -d "username=${USERNAME}&password=${PASSWORD}" | jq -r '.token')
+  if [ "$NEW_TOKEN" != "null" ] && [ -n "$NEW_TOKEN" ]; then
+    echo "$NEW_TOKEN" > "$TOKEN_FILE"
+    echo "$NEW_TOKEN"
+  else
+    echo ""
+  fi
+}
+
+TOKEN=$(get_token)
+if [ -z "$TOKEN" ]; then
   echo "Error de autenticación"
   exit 1
 fi
+
+echo "[1/6] Token JWT obtenido."
 
 echo "[2/6] Obteniendo ID del último workflow exitoso..."
 RUN_ID=$(curl -s -H "Accept: application/vnd.github.v3+json" \
