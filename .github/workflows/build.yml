@@ -1,0 +1,31 @@
+name: Build ESP32 Firmware
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PlatformIO
+        run: pip install platformio
+      - name: Build firmware
+        run: pio run
+      - name: Build LittleFS image
+        run: pio run --target buildfs
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: .pio/build/nodemcu-32s/firmware.bin
+      - name: Upload LittleFS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: littlefs
+          path: .pio/build/nodemcu-32s/littlefs.bin

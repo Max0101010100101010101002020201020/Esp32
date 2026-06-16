@@ -1,0 +1,7 @@
+body{margin:0;font-family:system-ui;background:#121212;color:#eee}
+#app{padding:16px}
+.card{background:#1e1e1e;border-radius:8px;padding:16px;margin:8px 0}
+button{background:#6200ea;color:#fff;border:none;padding:8px 16px;border-radius:4px}
+input,select{background:#333;border:1px solid #555;color:#fff;padding:8px;width:100%;box-sizing:border-box;margin:4px 0}
+.dark{background:#121212;color:#eee}
+.light{background:#fff;color:#000}

@@ -1,0 +1,5 @@
+ArduinoJson
+ESPAsyncWebServer
+mbedtls
+AsyncTCP
+LittleFS_esp32
