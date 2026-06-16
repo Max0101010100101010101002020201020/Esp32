@@ -25,7 +25,6 @@ WiFiManager wifiManager;
 ConfigManager configManager;
 SecurityManager security;
 FileSystemManager fileSystem;
-OTAManager ota;
 Scheduler scheduler;
 AutomationEngine automation;
 WebSocketHandler wsHandler;
@@ -178,12 +177,20 @@ void setup() {
 
   server.on("/api/ota/firmware", HTTP_POST, [](AsyncWebServerRequest *request){
     if (!security.validateRequest(request)) { request->send(403); return; }
-    ota.beginFirmwareOTA(request);
+    request->send(200, "text/plain", "Firmware upload ready");
   });
 
   server.on("/api/ota/littlefs", HTTP_POST, [](AsyncWebServerRequest *request){
     if (!security.validateRequest(request)) { request->send(403); return; }
-    ota.beginLittleFSOTA(request);
+    request->send(200, "text/plain", "LittleFS upload ready");
+  });
+
+  server.onFileUpload([](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
+    if (request->url() == "/api/ota/firmware") {
+      OTAManager::handleFirmwareUpload(request, filename, index, data, len, final);
+    } else if (request->url() == "/api/ota/littlefs") {
+      OTAManager::handleLittleFSUpload(request, filename, index, data, len, final);
+    }
   });
 
   xTaskCreatePinnedToCore([](void* p){ for(;;){ scheduler.tick(); vTaskDelay(1000/portTICK_PERIOD_MS); } }, "sched", 4096, NULL, 1, &taskSchedulerHandle, 0);

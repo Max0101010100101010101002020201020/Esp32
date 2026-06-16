@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <mbedtls/md.h>
+#include <ESPAsyncWebServer.h>
 
 class SecurityManager {
 public:
